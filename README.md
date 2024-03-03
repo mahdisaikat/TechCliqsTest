@@ -9,7 +9,6 @@ Open the `index.html` file in a web browser to run the Langton's Ant simulation.
 ## Code Overview
 
 - **`index.html`**: HTML file containing the canvas element and JavaScript code.
-- **`script.js`**: JavaScript file with the Langton's Ant implementation.
 
 ## Implementation Details
 

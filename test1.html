@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+    <title>TechCliqs</title>
+</head>
+
+<body>
+    <h1>Langton's Ant</h1>
+    <h3>TechCliqs Interview Test No 2</h3>
+
+    <canvas id="antCanvas" width="500" height="500"></canvas>
+
+    <script>
+        const canvas = document.getElementById('antCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const width = canvas.width;
+        const height = canvas.height;
+
+        const gridSize = 20;
+        const rows = height / gridSize;
+        const cols = width / gridSize;
+        const animationSpeed = 1000;
+
+        let grid = Array.from({ length: rows }, () => Array(cols).fill(0));
+        let ant = { x: Math.floor(cols / 2), y: Math.floor(rows / 2), direction: 'up' };
+
+        function turnClockwise() {
+            const directions = ['up', 'right', 'down', 'left'];
+            ant.direction = directions[(directions.indexOf(ant.direction) + 1) % 4];
+        }
+
+        function turnCounterClockwise() {
+            const directions = ['up', 'right', 'down', 'left'];
+            ant.direction = directions[(directions.indexOf(ant.direction) - 1 + 4) % 4];
+        }
+
+        function moveForward() {
+            const { x, y } = ant;
+            if (grid[y][x] === 0) {
+                turnClockwise();
+                grid[y][x] = 1;
+            } else {
+                turnCounterClockwise();
+                grid[y][x] = 0;
+            }
+
+            switch (ant.direction) {
+                case 'up':
+                    ant.y = (ant.y - 1 + rows) % rows;
+                    break;
+                case 'right':
+                    ant.x = (ant.x + 1) % cols;
+                    break;
+                case 'down':
+                    ant.y = (ant.y + 1) % rows;
+                    break;
+                case 'left':
+                    ant.x = (ant.x - 1 + cols) % cols;
+                    break;
+            }
+        }
+
+        function drawAnt() {
+            const { x, y } = ant;
+            const centerX = x * gridSize + gridSize / 2;
+            const centerY = y * gridSize + gridSize / 2;
+            const bodySize = gridSize / 2;
+
+            ctx.translate(centerX, centerY);
+
+            switch (ant.direction) {
+                case 'up':
+                    ctx.rotate(0);
+                    break;
+                case 'right':
+                    ctx.rotate(Math.PI / 2);
+                    break;
+                case 'down':
+                    ctx.rotate(Math.PI);
+                    break;
+                case 'left':
+                    ctx.rotate((3 * Math.PI) / 2);
+                    break;
+            }
+
+            ctx.beginPath();
+            ctx.arc(0, 0, bodySize, 0, 2 * Math.PI);
+            ctx.fillStyle = '#00F';
+            ctx.fill();
+            ctx.closePath();
+
+            const headSize = bodySize * 0.7;
+            const headY = -bodySize * Math.sin(Math.PI / 4);
+            ctx.beginPath();
+            ctx.arc(0, headY, headSize, 0, 2 * Math.PI);
+            ctx.fillStyle = '#00F';
+            ctx.fill();
+            ctx.closePath();
+
+            const eyeSize = headSize * 0.2;
+            const eyeX = headSize * Math.cos(Math.PI / 4);
+            const eyeY = headY - headSize * Math.sin(Math.PI / 4);
+            ctx.beginPath();
+            ctx.arc(eyeX, eyeY, eyeSize, 0, 2 * Math.PI);
+            ctx.fillStyle = '#FFF';
+            ctx.fill();
+            ctx.closePath();
+
+            const legLength = bodySize * 0.6;
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (i * Math.PI) / 6;
+                const legStartX = bodySize * Math.cos(angle);
+                const legStartY = -bodySize * Math.sin(angle);
+                const legEndX = legStartX + legLength * Math.cos(angle);
+                const legEndY = legStartY - legLength * Math.sin(angle);
+                ctx.moveTo(legStartX, legStartY);
+                ctx.lineTo(legEndX, legEndY);
+            }
+            ctx.strokeStyle = '#000';
+            ctx.stroke();
+            ctx.closePath();
+
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+
+
+        function drawGrid() {
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    ctx.fillStyle = grid[y][x] === 1 ? '#000' : '#fff';
+                    ctx.fillRect(x * gridSize, y * gridSize, gridSize, gridSize);
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            drawGrid();
+            drawAnt();
+        }
+
+        function animate() {
+            moveForward();
+            draw();
+            setTimeout(() => requestAnimationFrame(animate), animationSpeed);
+        }
+
+        animate();
+    </script>
+</body>
+
+</html>
